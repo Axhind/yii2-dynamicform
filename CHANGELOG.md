@@ -5,6 +5,8 @@ dev-master
 ----------
 
 - Support more Kartik Widgets in yii2-dynamic-form.js  
+
+  "kartik-v/yii2-datecontrol"
   
   "kartik-v/yii2-widget-select2"
   

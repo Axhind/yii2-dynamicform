@@ -6,7 +6,7 @@
  * @author Wanderson Bragança <wanderson.wbc@gmail.com>
  * @contributor Vivek Marakana <vivek.marakana@gmail.com>
  * @contributor Yoda <user1007017@gmail.com>
- * @contributor Vivek Marakana <vivek.marakana@gmail.com>
+ * @contributor Claudio Ridolfi <claudio.ridolfi@live.it>
  */
 (function ($) {
     var pluginName = 'yiiDynamicForm';
@@ -53,6 +53,7 @@
             var widgetOptions = eval($(this).attr('data-dynamicform'));
             _updateAttributes(widgetOptions);
             _restoreSpecialJs(widgetOptions);
+			_restoreModalAttrS(widgetOptions);
             _fixFormValidaton(widgetOptions);
         }
     };
@@ -143,6 +144,7 @@
 
             _updateAttributes(widgetOptions);
             _restoreSpecialJs(widgetOptions);
+			_restoreModalAttr(widgetOptions);
             _fixFormValidaton(widgetOptions);
             $elem.closest('.' + widgetOptions.widgetContainer).triggerHandler(events.afterInsert, $newclone);
         } else {
@@ -212,13 +214,14 @@
                 $todelete.remove();
                 _updateAttributes(widgetOptions);
                 _restoreSpecialJs(widgetOptions);
+				_restoreModalAttr(widgetOptions);
                 _fixFormValidaton(widgetOptions);
                 $('.' + widgetOptions.widgetContainer).triggerHandler(events.afterDelete);
             }
         }
     };
 
-    var _updateAttrID = function($elem, index) {
+    var _updateAttrID = function($elem, index, widgetCount) {
         var widgetOptions = eval($elem.closest('div[data-dynamicform]').attr('data-dynamicform'));
         var id            = $elem.attr('id');
         var newID         = id;
@@ -228,9 +231,9 @@
             if (matches && matches.length === 4) {
                 matches[2] = matches[2].substring(1, matches[2].length - 1);
                 var identifiers = matches[2].split('-');
-                identifiers[0] = index;
+                identifiers[identifiers.length-widgetCount] = index;
 
-                if (identifiers.length > 1) {
+                if (widgetCount > 1) {
                     var widgetsOptions = [];
                     $elem.parents('div[data-dynamicform]').each(function(i){
                         widgetsOptions[i] = eval($(this).attr('data-dynamicform'));
@@ -238,9 +241,9 @@
 
                     widgetsOptions = widgetsOptions.reverse();
 
-                    for (var i = identifiers.length - 1; i >= 1; i--) {
+                    for (var i = widgetCount - 1; i >= 1; i--) {
 						if (typeof widgetsOptions[i] !== "undefined") {
-							identifiers[i] = $elem.closest(widgetsOptions[i].widgetItem).index();
+							identifiers[identifiers.length - widgetCount + i] = $elem.closest(widgetsOptions[i].widgetItem).index();
 						}
                         //$(".kv-plugin-loading").addClass("hide");
                     }
@@ -265,7 +268,7 @@
         return newID;
     };
 
-    var _updateAttrName = function($elem, index) {
+    var _updateAttrName = function($elem, index, widgetCount) {
         var name = $elem.attr('name');
 
         if (name !== undefined) {
@@ -274,19 +277,18 @@
             if (matches && matches.length === 4) {
                 matches[2] = matches[2].replace(/\]\[/g, "-").replace(/\]|\[/g, '');
                 var identifiers = matches[2].split('-');
-                identifiers[0] = index;
+                identifiers[identifiers.length-widgetCount] = index;
 
-                if (identifiers.length > 1) {
+                if (widgetCount > 1) {
                     var widgetsOptions = [];
                     $elem.parents('div[data-dynamicform]').each(function(i){
                         widgetsOptions[i] = eval($(this).attr('data-dynamicform'));
                     });
 
                     widgetsOptions = widgetsOptions.reverse();
-                    for (var i = identifiers.length - 1; i >= 1; i--) {
-                        //identifiers[i] = $elem.closest(widgetsOptions[i].widgetItem).index();
+                    for (var i = widgetCount - 1; i >= 1; i--) {
                         if(typeof widgetsOptions[i] !== 'undefined'){
-                            identifiers[i] = $elem.closest(widgetsOptions[i].widgetItem).index();
+                            identifiers[identifiers.length - widgetCount +i] = $elem.closest(widgetsOptions[i].widgetItem).index();
                         }
                     }
                 }
@@ -301,16 +303,17 @@
 
     var _updateAttributes = function(widgetOptions) {
         var widgetOptionsRoot = _getWidgetOptionsRoot(widgetOptions);
+		var widgetCount = $(widgetOptions.widgetBody).parents('div[data-dynamicform]').length;
         
         $('.'+widgetOptionsRoot.widgetContainer+' '+widgetOptionsRoot.widgetItem).each(function(index) {
             var $item = $(this);
 
             $(this).find('*').each(function() {
                 // update "id" attribute
-                _updateAttrID($(this), index);
+                _updateAttrID($(this), index, widgetCount);
 
                 // update "name" attribute
-                _updateAttrName($(this), index);
+                _updateAttrName($(this), index, widgetCount);
             });
         });
     };
@@ -392,6 +395,26 @@
             });
         }
 
+		// "kartik-v/yii2-datecontrol"
+        var $hasDatecontrol = $(widgetOptionsRoot.widgetItem).find('[data-krajee-datecontrol]');
+        if ($hasDatecontrol.length > 0) {
+            $hasDatecontrol.each(function() {
+                // $(this).parent().removeData().datecontrol('destroy');
+                // $(this).parent().datecontrol(eval($(this).attr('data-krajee-datecontrol')));
+
+                $(this).attr('data-datepicker-source', $(this).attr('id') + '-kvdate');
+                // if ($($(this).parent().siblings('#' + $(this).attr('id').replace('-disp','')).data('datecontrol'))) { $('#' +$(this).attr('id').replace('-disp','')).datecontrol('destroy'); }
+                newOptions = eval($(this).attr('data-krajee-datecontrol'));
+                newOptions.idSave = $(this).attr('id').replace('-disp','').replace('#','');
+                $(this).datecontrol(newOptions);
+
+                if ($(this).data('kvDatepicker')) { $('#' + $(this).attr('id') ).kvDatepicker('destroy'); }
+                $(this).parent().kvDatepicker(eval($(this).attr('data-krajee-datecontrol')));
+
+                initDPRemove($(this).attr('id'));
+                initDPAddon($(this).attr('id'));
+            });
+        }
 
         // "kartik-v/yii2-widget-datetimepicker"
         var $hasDateTimepicker = $(widgetOptionsRoot.widgetItem).find('[data-krajee-kvdatetimepicker]');
@@ -605,6 +628,15 @@
                 $(this).rating(eval($(this).attr('data-krajee-rating')));
             });
         }
+	};
+	var _restoreModalAttr = function(widgetOptions) {
+        $('.button-dynamic').each(function(index, Element){
+            $(this).attr('data-target','#w' + index);
+        });
+
+        $('.modal-dynamic').each(function(index, Element){
+            $(this).attr('id','w' + index);
+        });
     };
 
 })(window.jQuery);

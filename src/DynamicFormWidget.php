@@ -82,6 +82,10 @@ class DynamicFormWidget extends \yii\base\Widget
      * @var string the Json encoded options.
      */
     private $_encodedOptions = '';
+	/**
+     * @var string the array indexes to add to each field input id and name, between the form name and the item index (eg. '[11][2]');
+     */
+    public $indexes = '';
 
     /**
      * Initializes the widget.
@@ -135,9 +139,12 @@ class DynamicFormWidget extends \yii\base\Widget
         $this->_options['fields']          = [];
 
         foreach ($this->formFields as $field) {
+			$regex = "/^(\[.+\])*(.+)$/i";
+            preg_match( $regex, $field, $fieldPrefix);
+
             $this->_options['fields'][] = [
-                'id' => Html::getInputId($this->model, '[{}]' . $field),
-                'name' => Html::getInputName($this->model, '[{}]' . $field)
+                'id' => Html::getInputId($this->model, $this->indexes. $fieldPrefix[1] . '[{}]' . $field),
+                'name' => Html::getInputName($this->model, $this->indexes. $fieldPrefix[1] . '[{}]' . $field)
             ];
         }
 
@@ -241,6 +248,8 @@ class DynamicFormWidget extends \yii\base\Widget
         $document = new \DOMDocument('1.0', \Yii::$app->charset);
         $document->appendChild($document->importNode($results->first()->getNode(0), true));
         $this->_options['template'] = trim($document->saveHTML());
+		// TODO Check if still necessary
+		/** $this->_options['template'] = trim(preg_replace('/^<!DOCTYPE.+?>/', '', str_replace( array('<html>', '</html>', '<body>', '</body>'), array('', '', '', ''), $document->saveHTML()))); */ 
 
         if (isset($this->_options['min']) && $this->_options['min'] === 0 && $this->model->isNewRecord && empty($this->model->getDirtyAttributes())) {
             $content = $this->removeItems($content);
@@ -283,5 +292,7 @@ class DynamicFormWidget extends \yii\base\Widget
         $crawler->clear();
         $crawler->add($document);
         return $crawler->filter('body')->eq(0)->html();
+		// TODO Check if still necessary
+		/** return preg_replace('/^<!DOCTYPE.+?>/', '', str_replace( array('<html>', '</html>', '<body>', '</body>'), array('', '', '', ''), $crawler->html())); */
     }
 }
