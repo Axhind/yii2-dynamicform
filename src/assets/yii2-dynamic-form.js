@@ -125,11 +125,7 @@
         var count = _count($elem, widgetOptions);
 
         if (count < widgetOptions.limit) {
-            if (count == 0) {
-            	$toclone = $(widgetOptions.template);
-            } else {
-            	$toclone = $(widgetOptions.widgetItem).first();
-            }
+            $toclone = $(widgetOptions.template);
             
             $newclone = $toclone.clone(false, false);
 
@@ -376,6 +372,12 @@
                     configDepdrop.depends[index] = match[1] + matchID[2] + match[3];
                 }
             }
+            for (index = 0; index < configDepdrop.params.length; ++index) {
+                var match = configDepdrop.params[index].match(regexID);
+                if (match && match.length === 4) {
+                    configDepdrop.params[index] = match[1] + matchID[2] + match[3];
+                }
+            }
         }
 
         $elem.depdrop(configDepdrop);
@@ -551,6 +553,9 @@
                     $(this).unbind();
                     _restoreKrajeeDepdrop($(this));
                 }
+                // remove Disabled (otherwise in next iteration it may be set as initDisabled = true )
+                $(this).prop("disabled", true);
+                $(this).removeAttr("disabled");
             });
         }
 

@@ -248,8 +248,6 @@ class DynamicFormWidget extends \yii\base\Widget
         $document = new \DOMDocument('1.0', \Yii::$app->charset);
         $document->appendChild($document->importNode($results->first()->getNode(0), true));
         $this->_options['template'] = trim($document->saveHTML());
-		// TODO Check if still necessary
-		/** $this->_options['template'] = trim(preg_replace('/^<!DOCTYPE.+?>/', '', str_replace( array('<html>', '</html>', '<body>', '</body>'), array('', '', '', ''), $document->saveHTML()))); */ 
 
         if (isset($this->_options['min']) && $this->_options['min'] === 0 && $this->model->isNewRecord && empty($this->model->getDirtyAttributes())) {
             $content = $this->removeItems($content);
