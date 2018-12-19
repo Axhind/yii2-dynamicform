@@ -551,11 +551,17 @@
                 if ($(this).data('select2') === undefined) {
                     $(this).removeData().off();
                     $(this).unbind();
+                    // Save disabled property value
+                    var disabledValue = $(this).prop("disabled");
                     _restoreKrajeeDepdrop($(this));
+                    // If it wasn't disabled ensure to remove it 
+                    // (otherwise in next iteration DepDrop will be set with initDisabled = true )
+                    if( ! disabledValue ){
+                        $(this).prop("disabled", true);
+                        $(this).removeAttr("disabled");
+                    }
                 }
-                // remove Disabled (otherwise in next iteration it may be set as initDisabled = true )
-                $(this).prop("disabled", true);
-                $(this).removeAttr("disabled");
+                
             });
         }
 
