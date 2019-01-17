@@ -422,7 +422,7 @@
         var $hasDateTimepicker = $(widgetOptionsRoot.widgetItem).find('[data-krajee-kvdatetimepicker]');
         if ($hasDateTimepicker.length > 0) {
             $hasDateTimepicker.each(function() {
-                $(this).parent().removeData().datetimepicker('remove');
+                $(this).parent().removeData().datetimepicker('destroy');
                 $(this).parent().datetimepicker(eval($(this).attr('data-krajee-kvdatetimepicker')));
             });
         }
@@ -431,7 +431,7 @@
         var $hasDatepicker = $(widgetOptionsRoot.widgetItem).find('[data-krajee-kvdatepicker]');
         if ($hasDatepicker.length > 0) {
             $hasDatepicker.each(function() {
-                $(this).parent().removeData().kvDatepicker('remove');
+                $(this).parent().removeData().kvDatepicker('destroy');
                 $(this).parent().kvDatepicker(eval($(this).attr('data-krajee-kvdatepicker')));
             });
         }
