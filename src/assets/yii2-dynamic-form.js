@@ -386,8 +386,6 @@
     var _restoreSpecialJs = function(widgetOptions) {
         var widgetOptionsRoot = _getWidgetOptionsRoot(widgetOptions);
 
-
-
         // "jquery.inputmask"
         var $hasInputmask = $(widgetOptionsRoot.widgetItem).find('[data-plugin-inputmask]');
         if ($hasInputmask.length > 0) {
@@ -641,6 +639,15 @@
                 $(this).rating('destroy');
                 $(this).rating(eval($(this).attr('data-krajee-rating')));
             });
+        }
+
+        // "kartik-v/yii-widget-switchinput"
+        var $hasSwitch = $( widgetOptionsRoot.widgetItem ).find( '[data-krajee-bootstrapSwitch]' );
+        if( $hasSwitch.length > 0 ) {
+            $hasSwitch.each( function () {
+                $( this ).bootstrapSwitch( 'destroy' );
+                $( this ).bootstrapSwitch( eval( $( this ).attr( 'data-krajee-bootstrapSwitch' ) ) );
+            } );
         }
 	};
 	var _restoreModalAttr = function(widgetOptions) {
